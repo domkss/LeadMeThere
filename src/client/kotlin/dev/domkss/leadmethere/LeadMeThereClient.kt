@@ -1,6 +1,7 @@
 package dev.domkss.leadmethere
 
 import com.example.playerdirectionarrow.network.PlayerPosPayload
+import com.mojang.blaze3d.systems.RenderSystem
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import net.fabricmc.fabric.api.client.rendering.v1.*
@@ -11,18 +12,18 @@ import net.minecraft.client.render.*
 import net.minecraft.client.render.RenderPhase.LineWidth
 import net.minecraft.client.render.VertexFormat.DrawMode
 import net.minecraft.util.Identifier
-import net.minecraft.util.Util
 import net.minecraft.util.math.*
 import net.minecraft.world.World
 import org.joml.Matrix4f
 import org.slf4j.LoggerFactory
 import java.util.*
+import kotlin.math.abs
 
 
 object LeadMeThereClient : ClientModInitializer {
 
 	private val logger = LoggerFactory.getLogger(this.javaClass.name)
-	private val ARROW_LAYER_ID = Identifier.of("dev.domkss.leadmethere", "orientation_hud")
+	private val ARROW_TEXTURE = Identifier.of("leadmethere", "textures/gui/arrow.png")
 
 	var trackedPlayer:PlayerPosPayload? =null
 
@@ -49,7 +50,7 @@ object LeadMeThereClient : ClientModInitializer {
 		HudLayerRegistrationCallback.EVENT.register(HudLayerRegistrationCallback { layeredDrawer: LayeredDrawerWrapper ->
 			layeredDrawer.attachLayerBefore(
 				IdentifiedLayer.CHAT,
-				ARROW_LAYER_ID,
+				ARROW_TEXTURE,
 				LeadMeThereClient::renderHUD
 			)
 		})
@@ -175,32 +176,62 @@ object LeadMeThereClient : ClientModInitializer {
 
 
 	private fun renderHUD(context: DrawContext, tickCounter: RenderTickCounter) {
-		val color = -0x10000 // Red
-		val targetColor = -0xff0100 // Green
+		val trackedPlayer= trackedPlayer
+		val client = MinecraftClient.getInstance()
+		val currentPlayer = client.player ?: return
+		val targetPos= trackedPlayer?.pos ?: return
 
-		// You can use the Util.getMeasuringTimeMs() function to get the current time in milliseconds.
-		// Divide by 1000 to get seconds.
-		val currentTime: Double = Util.getMeasuringTimeMs() / 1000.0
+		val playerPos = currentPlayer.pos
+		val playerYaw = currentPlayer.yaw
 
-		// "lerp" simply means "linear interpolation", which is a fancy way of saying "blend".
-		val lerpedAmount = MathHelper.abs(MathHelper.sin(currentTime.toFloat()))
-		val lerpedColor: Int = ColorHelper.lerp(lerpedAmount, color, targetColor)
+		// Calculate direction from player to target, ignoring Y
+		val toTargetX = targetPos.x - playerPos.x
+		val toTargetZ = targetPos.z - playerPos.z
 
-		val squareSize = 10
-		val centerX = context.scaledWindowWidth / 2
-		val topY = context.scaledWindowHeight / 10
-		val halfSize = squareSize / 2
+		val angleToTarget = MathHelper.atan2(toTargetZ, toTargetX) * (180.0 / Math.PI) - 90.0
 
-		// Draw the square at center horizontally, 1/6th vertically
-		context.fill(
-			centerX - halfSize,
-			topY - halfSize,
-			centerX + halfSize,
-			topY + halfSize,
-			0,
-			lerpedColor
-		)
+		// Normalize angles to [-180, 180] range
+		val relativeAngle = MathHelper.wrapDegrees(angleToTarget - playerYaw)
+
+		// Set a tolerance, 30 deg
+		val tolerance = 30.0
+
+		if (abs(relativeAngle) <= tolerance) {
+			val centerX = context.scaledWindowWidth / 2
+			val topY = context.scaledWindowHeight / 6
+
+			val arrowSize = 8
+
+			RenderSystem.enableBlend()
+
+			context.drawTexture(
+				{ texture -> RenderLayer.getGuiTextured(ARROW_TEXTURE) },
+				ARROW_TEXTURE,
+				centerX - arrowSize / 2,
+				topY - arrowSize / 2,
+				0f, 0f,
+				arrowSize, arrowSize,
+				128,128,
+				128, 128
+			)
+
+
+			val textRenderer = MinecraftClient.getInstance().textRenderer
+			val textWidth = textRenderer.getWidth(trackedPlayer.name)
+			val playerName= trackedPlayer.name
+
+			// Display Tracked Player Name
+			context.drawText(
+				textRenderer,
+				playerName,
+				centerX - textWidth / 2,
+				topY + arrowSize / 2 + 2,
+				0xFFFFFF, // color (white)
+				true
+			)
+		}
 
 	}
+
 
 }
