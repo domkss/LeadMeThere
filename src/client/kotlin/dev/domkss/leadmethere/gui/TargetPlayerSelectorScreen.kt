@@ -12,7 +12,7 @@ import net.minecraft.client.gui.screen.Screen
 import net.minecraft.text.Text
 
 
-class PlayerListScreen(private val currentTargetPlayerName: String?) : Screen(Text.of("Player List")) {
+class PlayerListScreen(private val currentTargetPlayerName: String?) : Screen(Text.of("Select Player To Track")) {
     // Retrieve list of online players
     private var onlinePlayers: List<String> = arrayListOf()
     private var playerListWidget: PlayerListWidget? = null
