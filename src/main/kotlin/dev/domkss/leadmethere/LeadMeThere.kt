@@ -1,77 +1,53 @@
 package dev.domkss.leadmethere
 
-import com.example.playerdirectionarrow.network.PlayerPosPayload
-import io.netty.buffer.Unpooled
+import com.example.playerdirectionarrow.network.ObserverSubscribePayload
+import com.example.playerdirectionarrow.network.ObserverUnsubscribePayload
+import dev.domkss.leadmethere.PlayerObserverManager.subscribe
+import dev.domkss.leadmethere.PlayerObserverManager.unSubscribe
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
-import net.minecraft.network.PacketByteBuf
-import net.minecraft.server.MinecraftServer
-import net.minecraft.server.network.ServerPlayerEntity
 import org.slf4j.LoggerFactory
+
 
 object LeadMeThere : ModInitializer {
     private val logger = LoggerFactory.getLogger(this.javaClass.name)
-	private var tickCounter = 0
-
-	override fun onInitialize() {
-		// This code runs as soon as Minecraft is in a mod-load-ready state.
-		// However, some things (like resources) may still be uninitialized.
-		// Proceed with mild caution.
-
-		ServerTickEvents.END_SERVER_TICK.register { server ->
-			tickCounter++
-			if (tickCounter >= 5) {  // Every 5 ticks (0.25 second)
-				sendClosestPlayerPosToAllPlayers(server)
-				tickCounter = 0  // Reset counter
-			}
-		}
-
-		logger.info("Lead Me There Server Mod Loaded!")
-	}
 
 
-	// Method to find the closest player
-	fun getClosestPlayer(player: ServerPlayerEntity, server: MinecraftServer): ServerPlayerEntity? {
-		var closestPlayer: ServerPlayerEntity? = null
-		var closestDistance = Double.MAX_VALUE
+    override fun onInitialize() {
 
-		// Iterate over all players to find the closest one
-		for (otherPlayer in server.playerManager.playerList) {
-			if (otherPlayer != player) {
-				val distance = player.squaredDistanceTo(otherPlayer)
-				if (distance < closestDistance) {
-					closestDistance = distance
-					closestPlayer = otherPlayer
-				}
-			}
-		}
+        // Register the custom payloads
+        PayloadTypeRegistry.playC2S().register(ObserverSubscribePayload.ID, ObserverSubscribePayload.CODEC)
+        PayloadTypeRegistry.playC2S().register(ObserverUnsubscribePayload.ID, ObserverUnsubscribePayload.CODEC)
 
-		return closestPlayer
-	}
+        // Register the receiver for the custom payloads
+        ServerPlayNetworking.registerGlobalReceiver(ObserverSubscribePayload.ID) { observerSubscribePayload: ObserverSubscribePayload, context: ServerPlayNetworking.Context ->
+            val player = context.player()
+            player.server.execute {
+                subscribe(context.player(), observerSubscribePayload.name)
+            }
+        }
 
-	// Server-side method to send the closest player's position to a player
-	fun sendClosestPlayerPosToClient(player: ServerPlayerEntity, server: MinecraftServer) {
-		// Get the closest player
-		val closestPlayer = getClosestPlayer(player, server)
+        ServerPlayNetworking.registerGlobalReceiver(ObserverUnsubscribePayload.ID) { observerUnsubscribePayload: ObserverUnsubscribePayload, context: ServerPlayNetworking.Context ->
+            val player = context.player()
+            player.server.execute {
+                unSubscribe(context.player())
+            }
+        }
 
-		// If we found the closest player, send their position
-		if (closestPlayer != null) {
-			val playerPos = PlayerPosPayload(closestPlayer.name.string, closestPlayer.pos)
+        var tickCounter = 0
+        //Send the data to observers
+        ServerTickEvents.END_SERVER_TICK.register { server ->
+            if (tickCounter > 5) {
+                PlayerObserverManager.tick(server);
+                tickCounter = 0
+            } else tickCounter++
+        }
 
-			// Send the packet to the player
-			ServerPlayNetworking.send(player, playerPos)
-		}
-	}
 
-	// Method to send the position of the closest player to all players
-	fun sendClosestPlayerPosToAllPlayers(server: MinecraftServer) {
-		// Loop through all connected players and send the packet to each one
-		for (player in server.playerManager.playerList) {
-			sendClosestPlayerPosToClient(player as ServerPlayerEntity, server)
-		}
-	}
-
+        logger.info("Lead Me There Server Mod Loaded!")
+    }
 
 
 }

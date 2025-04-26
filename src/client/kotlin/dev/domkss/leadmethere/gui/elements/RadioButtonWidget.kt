@@ -4,14 +4,14 @@ import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 import net.minecraft.client.gui.widget.ClickableWidget
 import net.minecraft.text.Text
 
-class ToggleButtonWidget(
+class RadioButtonWidget(
     x: Int,
     y: Int,
     width: Int,
     height: Int,
     private val textRenderer: TextRenderer,
     private val playerName: String,
-    private val onToggle: (String, Boolean) -> Unit
+    private val onSelected: (RadioButtonWidget) -> Unit
 ) : ClickableWidget(x, y, width, height, Text.of(playerName)) {
 
     var isToggled = false
@@ -26,12 +26,15 @@ class ToggleButtonWidget(
     }
 
     override fun onClick(mouseX: Double, mouseY: Double) {
-        toggle()
+        onSelected(this)  // Tell the parent "I was clicked"
     }
 
-    private fun toggle() {
-        isToggled = !isToggled
-        onToggle(playerName, isToggled)
+    fun setToggled(value: Boolean) {
+        isToggled = value
+    }
+
+    fun getButtonText (): String {
+        return playerName
     }
 
     override fun appendClickableNarrations(builder: NarrationMessageBuilder) {

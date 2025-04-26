@@ -33,7 +33,6 @@ object LeadMeThereClient : ClientModInitializer {
 			MinecraftClient.getInstance().execute {
 				trackedPlayer=playerPosPayload
 
-				// Now we have the decoded payload directly (playerPosPayload)
 				logger.info("Received position of ${playerPosPayload.name}: ${playerPosPayload.pos}")
 
 
@@ -53,7 +52,7 @@ object LeadMeThereClient : ClientModInitializer {
 		// Add a tick event listener to check if key is pressed
 		ClientTickEvents.END_CLIENT_TICK.register(ClientTickEvents.EndTick { client: MinecraftClient? ->
 			if (OpenTargetPlayerSelectorKey.getKeyBinding()?.wasPressed() == true) {
-				MinecraftClient.getInstance().setScreen(PlayerListScreen())
+				MinecraftClient.getInstance().setScreen(PlayerListScreen(trackedPlayer?.name))
 			}
 		})
 

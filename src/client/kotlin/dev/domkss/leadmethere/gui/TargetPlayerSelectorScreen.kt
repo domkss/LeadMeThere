@@ -1,17 +1,22 @@
 package dev.domkss.leadmethere.gui
 
 import PlayerListWidget
-import ToggleButtonWidget
+import RadioButtonWidget
+import com.example.playerdirectionarrow.network.ObserverSubscribePayload
+import com.example.playerdirectionarrow.network.ObserverUnsubscribePayload
+import dev.domkss.leadmethere.LeadMeThereClient
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.text.Text
 
 
-class PlayerListScreen : Screen(Text.of("Player List")) {
+class PlayerListScreen(private val currentTargetPlayerName: String?) : Screen(Text.of("Player List")) {
     // Retrieve list of online players
     private var onlinePlayers: List<String> = arrayListOf()
     private var playerListWidget: PlayerListWidget? = null
+    private val radioButtons = mutableListOf<RadioButtonWidget>()
 
     public override fun init() {
         val client = MinecraftClient.getInstance()
@@ -25,30 +30,48 @@ class PlayerListScreen : Screen(Text.of("Player List")) {
         )
 
 
-        onlinePlayers = client.networkHandler?.playerList?.filter { !it.profile.id.equals(currentPlayerUuid) }
+        //Create button for each online player
+        onlinePlayers += "Turn Tracking Off"
+        onlinePlayers += client.networkHandler?.playerList?.filter { !it.profile.id.equals(currentPlayerUuid) }
             ?.map { it.profile.name }
             ?.toList() ?: emptyList()
 
 
+        for (player in onlinePlayers) {
+            val firstListItem=(onlinePlayers.indexOf(player)==0)
 
-
-        for (i in 0..25) {
-
-            for (player in onlinePlayers) {
-                playerListWidget!!.addEntry(
-                    ToggleButtonWidget(
-                        0, 0, 200, 20, textRenderer, player
-                    ) { playerName, toggled ->
-                        println("Player $playerName is now ${if (toggled) "selected" else "deselected"}")
-                    }
-                )
+            val radioButton = RadioButtonWidget(
+                0, 0, 200, 20, textRenderer, player
+            ) { clickedButton ->
+                if(firstListItem){
+                    val unSubscribePayload = ObserverUnsubscribePayload()
+                    ClientPlayNetworking.send(unSubscribePayload)
+                    LeadMeThereClient.trackedPlayer=null
+                }else {
+                    // Send the packet to the server
+                    val selectedPlayerName = clickedButton.getButtonText()
+                    val subscribePayload = ObserverSubscribePayload(selectedPlayerName)
+                    ClientPlayNetworking.send(subscribePayload)
+                }
+                selectOnly(clickedButton)
             }
-        }
+            if(currentTargetPlayerName==null&&firstListItem) radioButton.setToggled(true)
+            else if (currentTargetPlayerName!=null && player.equals(currentTargetPlayerName, ignoreCase = true)) radioButton.setToggled(true)
+            radioButtons.add(radioButton)
+            playerListWidget!!.addEntry(radioButton)
 
+        }
 
         addDrawableChild(playerListWidget)
 
 
+    }
+
+
+    private fun selectOnly(selectedButton: RadioButtonWidget) {
+        for (button in radioButtons) {
+            button.setToggled(button == selectedButton)
+        }
     }
 
     override fun render(context: DrawContext, mouseX: Int, mouseY: Int, delta: Float) {

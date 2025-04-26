@@ -1,4 +1,3 @@
-import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.Element
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
@@ -14,10 +13,10 @@ class PlayerListWidget(
 ) : net.minecraft.client.gui.AbstractParentElement(), net.minecraft.client.gui.Drawable,
     net.minecraft.client.gui.Selectable {
 
-    private val children = mutableListOf<ToggleButtonWidget>()
+    private val children = mutableListOf<RadioButtonWidget>()
     private var scrollAmount = 0f
 
-    fun addEntry(widget: ToggleButtonWidget) {
+    fun addEntry(widget: RadioButtonWidget) {
         children.add(widget)
     }
 

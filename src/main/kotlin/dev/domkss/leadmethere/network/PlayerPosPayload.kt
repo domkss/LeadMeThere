@@ -14,7 +14,7 @@ class PlayerPosPayload(
     override fun getId(): CustomPayload.Id<*> = ID
 
     companion object {
-        val ID = CustomPayload.Id<PlayerPosPayload>(Identifier.of("playerdirectionarrow", "player_pos"))
+        val ID = CustomPayload.Id<PlayerPosPayload>(Identifier.of("dev.domkss.leadmethere", "target_player_pos"))
 
         // Define a codec to write and read data
         val CODEC = object : PacketCodec<PacketByteBuf, PlayerPosPayload> {
