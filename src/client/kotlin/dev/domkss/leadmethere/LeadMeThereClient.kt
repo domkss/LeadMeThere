@@ -27,7 +27,7 @@ object LeadMeThereClient : ClientModInitializer {
 
 
     var trackedPlayer: PlayerPosPayload? = null
-
+    private var lastPacketReceivedTick: Int = 0
 
     override fun onInitializeClient() {
         // Register the custom payload
@@ -39,12 +39,19 @@ object LeadMeThereClient : ClientModInitializer {
             // Ensure the code runs on the main client thread to interact with Minecraft
             MinecraftClient.getInstance().execute {
                 trackedPlayer = playerPosPayload
-
-                logger.info("Received position of ${playerPosPayload.name}: ${playerPosPayload.pos}")
-
-
+                lastPacketReceivedTick = MinecraftClient.getInstance().world?.time?.toInt() ?: 0
             }
         }
+
+        //Reset target if no position received for 2 seconds
+        ClientTickEvents.END_CLIENT_TICK.register(ClientTickEvents.EndTick { client ->
+            if (trackedPlayer != null) {
+                val currentTick = client.world?.time?.toInt() ?: return@EndTick
+                if (currentTick - lastPacketReceivedTick > 40) {
+                    trackedPlayer = null
+                }
+            }
+        })
 
         //Register Direction Display HUD Renderer
         TargetDirectionHUDRenderer.register()

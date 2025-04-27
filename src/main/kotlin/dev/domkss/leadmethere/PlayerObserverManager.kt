@@ -35,6 +35,7 @@ object PlayerObserverManager {
             for (observer in observers) {
                 val observerPlayer = server.playerManager.getPlayer(observer.key)
                 if (observerPlayer == null || !observerPlayer.isAlive) return
+                if(!world.players.contains(observerPlayer))return
 
                 val targetName = observer.value
                 val targetPlayer =
