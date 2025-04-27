@@ -13,6 +13,7 @@ import dev.domkss.leadmethere.LeadMeThereClient.trackedPlayer
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.DrawContext
+import net.minecraft.client.render.RenderLayer
 import net.minecraft.client.render.RenderTickCounter
 import net.minecraft.util.Identifier
 import net.minecraft.util.math.MathHelper
@@ -57,11 +58,12 @@ object TargetDirectionHUDRenderer {
             RenderSystem.enableBlend()
 
             context.drawTexture(
+                { texture -> RenderLayer.getGuiTextured(DIRECTION_ARROW_TEXTURE) },
                 DIRECTION_ARROW_TEXTURE,
                 centerX - arrowSize / 2,
                 topY - arrowSize / 2,
-                arrowSize, arrowSize,
                 0f, 0f,
+                arrowSize, arrowSize,
                 128, 128,
                 128, 128
             )

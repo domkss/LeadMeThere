@@ -71,7 +71,7 @@ object TargetPlayerOutlineRenderer {
             val blockState = world.getBlockState(blockPos)
 
 
-            if (!blockState.isTransparent(world,blockPos)) {
+            if (!blockState.isTransparent) {
                 // Found a solid block between camera and target position
                 return true
             }
