@@ -19,7 +19,8 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry
 import net.minecraft.client.MinecraftClient
 import org.slf4j.LoggerFactory
-
+import net.minecraft.client.util.InputUtil
+import net.minecraft.client.option.KeyBinding
 
 object LeadMeThereClient : ClientModInitializer {
 
@@ -67,6 +68,14 @@ object LeadMeThereClient : ClientModInitializer {
         ClientTickEvents.END_CLIENT_TICK.register(ClientTickEvents.EndTick { client: MinecraftClient? ->
             if (OpenTargetPlayerSelectorKey.getKeyBinding()?.wasPressed() == true) {
                 MinecraftClient.getInstance().setScreen(PlayerListScreen(trackedPlayer?.name))
+            }
+
+            // Remove the default Tab Keybinding if it's the default
+            if (client?.options != null) {
+                if (MinecraftClient.getInstance().options.playerListKey.isDefault) {
+                    MinecraftClient.getInstance().options.playerListKey.setBoundKey(InputUtil.UNKNOWN_KEY)
+                    KeyBinding.updateKeysByCode()
+                }
             }
         })
 
