@@ -61,7 +61,6 @@ object TargetDirectionHUDRenderer {
 
             val arrowSize = 8
 
-            RenderSystem.enableBlend()
 
             context.drawTexture(
                 { texture -> RenderLayer.getGuiTextured(DIRECTION_ARROW_TEXTURE) },

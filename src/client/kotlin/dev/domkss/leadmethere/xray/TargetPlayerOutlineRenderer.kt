@@ -8,14 +8,19 @@
 
 package dev.domkss.leadmethere.xray
 
+import com.mojang.blaze3d.pipeline.BlendFunction
+import com.mojang.blaze3d.pipeline.RenderPipeline
+import com.mojang.blaze3d.platform.DepthTestFunction
+import com.mojang.blaze3d.vertex.VertexFormat.DrawMode
 import dev.domkss.leadmethere.LeadMeThereClient.trackedPlayer
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents
 import net.minecraft.client.MinecraftClient
+import net.minecraft.client.gl.RenderPipelines
+import net.minecraft.client.gl.UniformType
 import net.minecraft.client.render.RenderLayer
 import net.minecraft.client.render.RenderPhase
 import net.minecraft.client.render.RenderPhase.LineWidth
 import net.minecraft.client.render.VertexConsumer
-import net.minecraft.client.render.VertexFormat.DrawMode
 import net.minecraft.client.render.VertexFormats
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Box
@@ -23,6 +28,7 @@ import net.minecraft.util.math.Vec3d
 import net.minecraft.world.World
 import org.joml.Matrix4f
 import java.util.*
+
 
 object TargetPlayerOutlineRenderer {
 
@@ -56,29 +62,42 @@ object TargetPlayerOutlineRenderer {
     })
 
     private fun shouldDrawPlayerOutlineBox(world: World, cameraPos: Vec3d, targetPos: Vec3d): Boolean {
-        val targetPosCenter = targetPos.add(0.0, 1.0, 0.0)
+        val offsets = listOf(
+            Vec3d(0.0, 1.0, 0.0),  // Head
+            Vec3d(0.0, 0.5, 0.0),  // Chest
+            Vec3d(0.3, 0.5, 0.0),  // Right shoulder
+            Vec3d(-0.3, 0.5, 0.0), // Left shoulder
+            Vec3d(0.0, 0.5, 0.3),  // Front
+            Vec3d(0.0, 0.5, -0.3)  // Back
+        )
 
+        for (offset in offsets) {
+            if (rayHitsSolidBlock(world, cameraPos, targetPos.add(offset))) {
+                return true
+            }
+        }
 
-        val direction = targetPosCenter.subtract(cameraPos).normalize()
-        val distance = cameraPos.distanceTo(targetPosCenter)
+        return false
+    }
 
-        val stepSize = 0.5
+    private fun rayHitsSolidBlock(world: World, from: Vec3d, to: Vec3d): Boolean {
+        val direction = to.subtract(from).normalize()
+        val distance = from.distanceTo(to)
+
+        val stepSize = 0.2
         var traveled = 0.0
 
         while (traveled < distance) {
-            val currentPos = cameraPos.add(direction.multiply(traveled))
-            val blockPos = BlockPos(currentPos.x.toInt(), currentPos.y.toInt(), currentPos.z.toInt())
+            val currentPos = from.add(direction.multiply(traveled))
+            val blockPos = BlockPos.ofFloored(currentPos)
+
             val blockState = world.getBlockState(blockPos)
-
-
-            if (!blockState.isTransparent) {
-                // Found a solid block between camera and target position
+            if (!blockState.isAir && !blockState.isTransparent) {
                 return true
             }
             traveled += stepSize
         }
 
-        // No solid block found - only transparent blocks between camera and target position
         return false
     }
 
@@ -121,22 +140,32 @@ object TargetPlayerOutlineRenderer {
     }
 
 
+    val XRAY_LINES_PIPELINE: RenderPipeline = RenderPipelines.register(
+        RenderPipeline.builder(
+            RenderPipelines.RENDERTYPE_LINES_SNIPPET
+        )
+            .withLocation("pipeline/xray_lines")
+            .withVertexShader("core/rendertype_lines")
+            .withFragmentShader("core/rendertype_lines")
+            .withUniform("LineWidth", UniformType.FLOAT)
+            .withUniform("ScreenSize", UniformType.VEC2)
+            .withBlend(BlendFunction.TRANSLUCENT)
+            .withCull(false)
+            .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
+            .withVertexFormat(VertexFormats.POSITION_COLOR_NORMAL, DrawMode.LINES)
+            .build()
+    )
+
     private val XRAY_LINES_LAYER = RenderLayer.of(
         "player_xray_outlines",
-        VertexFormats.LINES,
-        DrawMode.LINES,
         1536,
+        XRAY_LINES_PIPELINE,
         RenderLayer.MultiPhaseParameters.builder()
-            .program(RenderPhase.LINES_PROGRAM)
             .lineWidth(LineWidth(OptionalDouble.of(2.0)))
             .layering(RenderPhase.VIEW_OFFSET_Z_LAYERING)
-            .transparency(RenderPhase.TRANSLUCENT_TRANSPARENCY)
             .target(RenderPhase.ITEM_ENTITY_TARGET)
-            .depthTest(RenderPhase.ALWAYS_DEPTH_TEST)
-            .writeMaskState(RenderPhase.ALL_MASK)
-            .cull(RenderPhase.DISABLE_CULLING)
             .build(false)
-    );
+    )
 
 
 }
