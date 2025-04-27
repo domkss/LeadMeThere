@@ -1,4 +1,12 @@
-package com.example.playerdirectionarrow.network
+/*
+ * Copyright (c) 2025 Dominik Kiss
+ * Repository: https://github.com/domkss/LeadMeThere
+ *
+ * This code is licensed under the MIT License.
+ * See the attached LICENSE file for more information.
+ */
+
+package dev.domkss.leadmethere.network
 
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.network.codec.PacketCodec

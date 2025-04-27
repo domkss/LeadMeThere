@@ -1,9 +1,17 @@
+/*
+ * Copyright (c) 2025 Dominik Kiss
+ * Repository: https://github.com/domkss/LeadMeThere
+ *
+ * This code is licensed under the MIT License.
+ * See the attached LICENSE file for more information.
+ */
+
 package dev.domkss.leadmethere
 
-import com.example.playerdirectionarrow.network.ObserverSubscribePayload
-import com.example.playerdirectionarrow.network.ObserverUnsubscribePayload
 import dev.domkss.leadmethere.PlayerObserverManager.subscribe
 import dev.domkss.leadmethere.PlayerObserverManager.unSubscribe
+import dev.domkss.leadmethere.network.ObserverSubscribePayload
+import dev.domkss.leadmethere.network.ObserverUnsubscribePayload
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry
@@ -36,13 +44,9 @@ object LeadMeThere : ModInitializer {
             }
         }
 
-        var tickCounter = 0
         //Send the data to observers
         ServerTickEvents.END_SERVER_TICK.register { server ->
-            if (tickCounter > 5) {
-                PlayerObserverManager.tick(server);
-                tickCounter = 0
-            } else tickCounter++
+            PlayerObserverManager.tick(server);
         }
 
 

@@ -1,10 +1,18 @@
+/*
+ * Copyright (c) 2025 Dominik Kiss
+ * Repository: https://github.com/domkss/LeadMeThere
+ *
+ * This code is licensed under the MIT License.
+ * See the attached LICENSE file for more information.
+ */
+
 package dev.domkss.leadmethere.gui
 
-import PlayerListWidget
-import RadioButtonWidget
-import com.example.playerdirectionarrow.network.ObserverSubscribePayload
-import com.example.playerdirectionarrow.network.ObserverUnsubscribePayload
 import dev.domkss.leadmethere.LeadMeThereClient
+import dev.domkss.leadmethere.gui.elements.PlayerListWidget
+import dev.domkss.leadmethere.gui.elements.RadioButtonWidget
+import dev.domkss.leadmethere.network.ObserverSubscribePayload
+import dev.domkss.leadmethere.network.ObserverUnsubscribePayload
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.DrawContext
@@ -38,16 +46,16 @@ class PlayerListScreen(private val currentTargetPlayerName: String?) : Screen(Te
 
 
         for (player in onlinePlayers) {
-            val firstListItem=(onlinePlayers.indexOf(player)==0)
+            val firstListItem = (onlinePlayers.indexOf(player) == 0)
 
             val radioButton = RadioButtonWidget(
                 0, 0, 200, 20, textRenderer, player
             ) { clickedButton ->
-                if(firstListItem){
+                if (firstListItem) {
                     val unSubscribePayload = ObserverUnsubscribePayload()
                     ClientPlayNetworking.send(unSubscribePayload)
-                    LeadMeThereClient.trackedPlayer=null
-                }else {
+                    LeadMeThereClient.trackedPlayer = null
+                } else {
                     // Send the packet to the server
                     val selectedPlayerName = clickedButton.getButtonText()
                     val subscribePayload = ObserverSubscribePayload(selectedPlayerName)
@@ -55,8 +63,12 @@ class PlayerListScreen(private val currentTargetPlayerName: String?) : Screen(Te
                 }
                 selectOnly(clickedButton)
             }
-            if(currentTargetPlayerName==null&&firstListItem) radioButton.setToggled(true)
-            else if (currentTargetPlayerName!=null && player.equals(currentTargetPlayerName, ignoreCase = true)) radioButton.setToggled(true)
+            if (currentTargetPlayerName == null && firstListItem) radioButton.setToggled(true)
+            else if (currentTargetPlayerName != null && player.equals(
+                    currentTargetPlayerName,
+                    ignoreCase = true
+                )
+            ) radioButton.setToggled(true)
             radioButtons.add(radioButton)
             playerListWidget!!.addEntry(radioButton)
 

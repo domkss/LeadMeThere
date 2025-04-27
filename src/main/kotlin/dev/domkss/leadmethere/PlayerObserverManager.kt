@@ -1,9 +1,15 @@
+/*
+ * Copyright (c) 2025 Dominik Kiss
+ * Repository: https://github.com/domkss/LeadMeThere
+ *
+ * This code is licensed under the MIT License.
+ * See the attached LICENSE file for more information.
+ */
+
 package dev.domkss.leadmethere
 
-import com.example.playerdirectionarrow.network.PlayerPosPayload
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
+import dev.domkss.leadmethere.network.PlayerPosPayload
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
-import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.network.ServerPlayerEntity
 import java.util.*
@@ -19,7 +25,7 @@ object PlayerObserverManager {
         observers[observer.uuid] = targetName
     }
 
-    fun unSubscribe(observer: ServerPlayerEntity){
+    fun unSubscribe(observer: ServerPlayerEntity) {
         observers.remove(observer.uuid)
     }
 
@@ -28,10 +34,11 @@ object PlayerObserverManager {
         for (world in server.worlds) {
             for (observer in observers) {
                 val observerPlayer = server.playerManager.getPlayer(observer.key)
-                if(observerPlayer==null || !observerPlayer.isAlive) return
+                if (observerPlayer == null || !observerPlayer.isAlive) return
 
                 val targetName = observer.value
-                val targetPlayer = world.players.firstOrNull { it -> it.gameProfile.name.equals(targetName, ignoreCase = true) }
+                val targetPlayer =
+                    world.players.firstOrNull { it -> it.gameProfile.name.equals(targetName, ignoreCase = true) }
 
                 if (targetPlayer == null || !targetPlayer.isAlive || targetPlayer.isDisconnected) {
                     continue  // Target does not exist in this world or is dead

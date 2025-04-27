@@ -1,3 +1,13 @@
+/*
+ * Copyright (c) 2025 Dominik Kiss
+ * Repository: https://github.com/domkss/LeadMeThere
+ *
+ * This code is licensed under the MIT License.
+ * See the attached LICENSE file for more information.
+ */
+
+package dev.domkss.leadmethere.gui.elements
+
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.Element
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder

@@ -1,3 +1,11 @@
+/*
+ * Copyright (c) 2025 Dominik Kiss
+ * Repository: https://github.com/domkss/LeadMeThere
+ *
+ * This code is licensed under the MIT License.
+ * See the attached LICENSE file for more information.
+ */
+
 package dev.domkss.leadmethere.hud
 
 import com.mojang.blaze3d.systems.RenderSystem

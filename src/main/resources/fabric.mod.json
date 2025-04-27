@@ -3,15 +3,14 @@
 	"id": "leadmethere",
 	"version": "${version}",
 	"name": "LeadMeThere",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"description": "Track your friends with a direction indicator, and highlight them through walls with a visible outline.",
 	"authors": [
-		"Me!"
+		"Dominik Kiss"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"sources": "https://github.com/domkss/LeadMeThere"
 	},
-	"license": "CC0-1.0",
+	"license": "MIT",
 	"icon": "assets/leadmethere/icon.png",
 	"environment": "*",
 	"entrypoints": {
@@ -41,8 +40,5 @@
 		"java": ">=21",
 		"fabric-api": "*",
 		"fabric-language-kotlin": "*"
-	},
-	"suggests": {
-		"another-mod": "*"
 	}
 }
