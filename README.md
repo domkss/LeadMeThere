@@ -11,6 +11,7 @@ If you’ve ever taken a wrong turn to **1035, 45, 17** instead of **-1034, 45, 
 
 Stay together, avoid getting lost, and spend more time adventuring — not navigating.
 
+![readme_image](https://github.com/user-attachments/assets/b30197cf-73a5-48c0-a6b3-8c7ce73856e9)
 
 
 ### <br/>Framework:
