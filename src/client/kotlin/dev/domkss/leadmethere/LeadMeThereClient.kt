@@ -18,6 +18,8 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry
 import net.minecraft.client.MinecraftClient
+import net.minecraft.client.util.InputUtil
+import net.minecraft.client.option.KeyBinding
 import org.slf4j.LoggerFactory
 
 
@@ -68,7 +70,16 @@ object LeadMeThereClient : ClientModInitializer {
             if (OpenTargetPlayerSelectorKey.getKeyBinding()?.wasPressed() == true) {
                 MinecraftClient.getInstance().setScreen(PlayerListScreen(trackedPlayer?.name))
             }
+
+            // Remove the default Tab Keybinding if it's the default
+            if (client?.options != null) {
+                if (MinecraftClient.getInstance().options.playerListKey.isDefault) {
+                    MinecraftClient.getInstance().options.playerListKey.setBoundKey(InputUtil.UNKNOWN_KEY)
+                    KeyBinding.updateKeysByCode()
+                }
+            }
         })
+
 
 
         logger.info("Lead Me There Client Mod Loaded!")

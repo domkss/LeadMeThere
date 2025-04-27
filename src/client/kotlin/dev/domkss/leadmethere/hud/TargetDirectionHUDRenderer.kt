@@ -10,12 +10,9 @@ package dev.domkss.leadmethere.hud
 
 import com.mojang.blaze3d.systems.RenderSystem
 import dev.domkss.leadmethere.LeadMeThereClient.trackedPlayer
-import net.fabricmc.fabric.api.client.rendering.v1.HudLayerRegistrationCallback
-import net.fabricmc.fabric.api.client.rendering.v1.IdentifiedLayer
-import net.fabricmc.fabric.api.client.rendering.v1.LayeredDrawerWrapper
+import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.DrawContext
-import net.minecraft.client.render.RenderLayer
 import net.minecraft.client.render.RenderTickCounter
 import net.minecraft.util.Identifier
 import net.minecraft.util.math.MathHelper
@@ -26,12 +23,8 @@ object TargetDirectionHUDRenderer {
     private val DIRECTION_ARROW_TEXTURE = Identifier.of("leadmethere", "textures/gui/arrow.png")
 
     fun register() =
-        HudLayerRegistrationCallback.EVENT.register(HudLayerRegistrationCallback { layeredDrawer: LayeredDrawerWrapper ->
-            layeredDrawer.attachLayerBefore(
-                IdentifiedLayer.CHAT,
-                DIRECTION_ARROW_TEXTURE,
-                this::renderDirectionHUD
-            )
+        HudRenderCallback.EVENT.register(HudRenderCallback { drawContext: DrawContext, tickCounter:RenderTickCounter ->
+            renderDirectionHUD(drawContext,tickCounter)
         })
 
     private fun renderDirectionHUD(context: DrawContext, tickCounter: RenderTickCounter) {
@@ -64,12 +57,11 @@ object TargetDirectionHUDRenderer {
             RenderSystem.enableBlend()
 
             context.drawTexture(
-                { texture -> RenderLayer.getGuiTextured(DIRECTION_ARROW_TEXTURE) },
                 DIRECTION_ARROW_TEXTURE,
                 centerX - arrowSize / 2,
                 topY - arrowSize / 2,
-                0f, 0f,
                 arrowSize, arrowSize,
+                0f, 0f,
                 128, 128,
                 128, 128
             )
