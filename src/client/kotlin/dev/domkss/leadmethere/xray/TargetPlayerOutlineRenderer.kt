@@ -56,29 +56,42 @@ object TargetPlayerOutlineRenderer {
     })
 
     private fun shouldDrawPlayerOutlineBox(world: World, cameraPos: Vec3d, targetPos: Vec3d): Boolean {
-        val targetPosCenter = targetPos.add(0.0, 1.0, 0.0)
+        val offsets = listOf(
+            Vec3d(0.0, 1.0, 0.0),  // Head
+            Vec3d(0.0, 0.5, 0.0),  // Chest
+            Vec3d(0.3, 0.5, 0.0),  // Right shoulder
+            Vec3d(-0.3, 0.5, 0.0), // Left shoulder
+            Vec3d(0.0, 0.5, 0.3),  // Front
+            Vec3d(0.0, 0.5, -0.3)  // Back
+        )
 
+        for (offset in offsets) {
+            if (rayHitsSolidBlock(world, cameraPos, targetPos.add(offset))) {
+                return true
+            }
+        }
 
-        val direction = targetPosCenter.subtract(cameraPos).normalize()
-        val distance = cameraPos.distanceTo(targetPosCenter)
+        return false
+    }
 
-        val stepSize = 0.5
+    private fun rayHitsSolidBlock(world: World, from: Vec3d, to: Vec3d): Boolean {
+        val direction = to.subtract(from).normalize()
+        val distance = from.distanceTo(to)
+
+        val stepSize = 0.2
         var traveled = 0.0
 
         while (traveled < distance) {
-            val currentPos = cameraPos.add(direction.multiply(traveled))
-            val blockPos = BlockPos(currentPos.x.toInt(), currentPos.y.toInt(), currentPos.z.toInt())
+            val currentPos = from.add(direction.multiply(traveled))
+            val blockPos = BlockPos.ofFloored(currentPos)
+
             val blockState = world.getBlockState(blockPos)
-
-
-            if (!blockState.isTransparent) {
-                // Found a solid block between camera and target position
+            if (!blockState.isAir && !blockState.isTransparent) {
                 return true
             }
             traveled += stepSize
         }
 
-        // No solid block found - only transparent blocks between camera and target position
         return false
     }
 
