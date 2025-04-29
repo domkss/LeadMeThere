@@ -8,7 +8,9 @@
 		"Dominik Kiss"
 	],
 	"contact": {
-		"sources": "https://github.com/domkss/LeadMeThere"
+		"sources": "https://github.com/domkss/LeadMeThere",
+		"homepage": "https://modrinth.com/mod/lead-me-there",
+		"issues": "https://github.com/domkss/LeadMeThere/issues"
 	},
 	"license": "MIT",
 	"icon": "assets/leadmethere/icon.png",
