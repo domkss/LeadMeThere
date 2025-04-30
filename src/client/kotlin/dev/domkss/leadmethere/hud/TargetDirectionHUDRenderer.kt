@@ -88,7 +88,7 @@ object TargetDirectionHUDRenderer {
             val toTargetY = targetPos.y - playerPos.y
             val distanceToTarget:Int = ceil(sqrt(toTargetX * toTargetX + toTargetY * toTargetY + toTargetZ * toTargetZ)).toInt()
             val distanceText ="${distanceToTarget}m"
-            val distanceTextWidth = textRenderer.getWidth(trackedPlayer.name)
+            val distanceTextWidth = textRenderer.getWidth(distanceText)
 
             // Display Distance To Target Player
             context.drawText(
