@@ -20,6 +20,8 @@ import net.minecraft.client.render.RenderTickCounter
 import net.minecraft.util.Identifier
 import net.minecraft.util.math.MathHelper
 import kotlin.math.abs
+import kotlin.math.ceil
+import kotlin.math.sqrt
 
 object TargetDirectionHUDRenderer {
 
@@ -76,18 +78,34 @@ object TargetDirectionHUDRenderer {
 
 
             val textRenderer = MinecraftClient.getInstance().textRenderer
-            val textWidth = textRenderer.getWidth(trackedPlayer.name)
+            val nameTextWidth = textRenderer.getWidth(trackedPlayer.name)
             val playerName = trackedPlayer.name
 
             // Display Tracked Player Name
             context.drawText(
                 textRenderer,
                 playerName,
-                centerX - textWidth / 2,
+                centerX - nameTextWidth / 2,
                 topY + arrowSize / 2 + 2,
                 0xFFFFFF, // color (white)
                 true
             )
+
+            val toTargetY = targetPos.y - playerPos.y
+            val distanceToTarget:Int = ceil(sqrt(toTargetX * toTargetX + toTargetY * toTargetY + toTargetZ * toTargetZ)).toInt()
+            val distanceText ="${distanceToTarget}m"
+            val distanceTextWidth = textRenderer.getWidth(trackedPlayer.name)
+
+            // Display Distance To Target Player
+            context.drawText(
+                textRenderer,
+                distanceText,
+                centerX - distanceTextWidth / 2,
+                topY + arrowSize / 2 + 12,
+                0xFFFFFF, // color (white)
+                true
+            )
+
         }
 
     }
