@@ -31,9 +31,6 @@ object LeadMeThereClient : ClientModInitializer {
     private var lastPacketReceivedTick: Int = 0
 
     override fun onInitializeClient() {
-        // Register the custom payload
-        PayloadTypeRegistry.playS2C().register(PlayerPosPayload.ID, PlayerPosPayload.CODEC)
-
         // Register the receiver for the custom payload
         ClientPlayNetworking.registerGlobalReceiver(PlayerPosPayload.ID) { playerPosPayload: PlayerPosPayload, context: ClientPlayNetworking.Context ->
 
