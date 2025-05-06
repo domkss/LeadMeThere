@@ -12,6 +12,7 @@ import dev.domkss.leadmethere.PlayerObserverManager.subscribe
 import dev.domkss.leadmethere.PlayerObserverManager.unSubscribe
 import dev.domkss.leadmethere.network.ObserverSubscribePayload
 import dev.domkss.leadmethere.network.ObserverUnsubscribePayload
+import dev.domkss.leadmethere.network.PlayerPosPayload
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry
@@ -28,6 +29,7 @@ object LeadMeThere : ModInitializer {
         // Register the custom payloads
         PayloadTypeRegistry.playC2S().register(ObserverSubscribePayload.ID, ObserverSubscribePayload.CODEC)
         PayloadTypeRegistry.playC2S().register(ObserverUnsubscribePayload.ID, ObserverUnsubscribePayload.CODEC)
+        PayloadTypeRegistry.playS2C().register(PlayerPosPayload.ID, PlayerPosPayload.CODEC)
 
         // Register the receiver for the custom payloads
         ServerPlayNetworking.registerGlobalReceiver(ObserverSubscribePayload.ID) { observerSubscribePayload: ObserverSubscribePayload, context: ServerPlayNetworking.Context ->
